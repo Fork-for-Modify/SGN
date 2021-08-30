@@ -224,16 +224,18 @@ class Corpus(object):
             ToTensor(torch.long),
         ])
 
-        self.train_dataset = self.build_dataset("train", self.C.loader.train_caption_fpath)
-        self.val_dataset = self.build_dataset("val", self.C.loader.val_caption_fpath)
-        self.test_dataset = None
-        if hasattr(self.C.loader, 'test_caption_fpath'):
-            self.test_dataset = self.build_dataset("test", self.C.loader.test_caption_fpath)
+        if self.C.run_mode=='train':
+            self.train_dataset = self.build_dataset("train", self.C.loader.train_caption_fpath)
+            self.train_data_loader = self.build_data_loader(self.train_dataset)
 
-        self.train_data_loader = self.build_data_loader(self.train_dataset)
-        self.val_data_loader = self.build_data_loader(self.val_dataset)
-        self.test_data_loader = None
-        if hasattr(self.C.loader, 'test_caption_fpath'):
+            self.val_dataset = self.build_dataset("val", self.C.loader.val_caption_fpath)
+            self.val_data_loader = self.build_data_loader(self.val_dataset)
+            
+            self.test_dataset = None
+            self.test_data_loader = None       
+        
+        elif self.C.run_mode=='test' or  self.C.run_mode=='val':
+            self.test_dataset = self.build_dataset("test", self.C.loader.test_caption_fpath)
             self.test_data_loader = self.build_data_loader(self.test_dataset)
 
     def build_dataset(self, split, caption_fpath):

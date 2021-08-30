@@ -167,6 +167,27 @@ def evaluate(model, val_iter, vocab, CA_lambda):
     }
     return loss
 
+def test(model, data_iter, vocab):
+    def build_refs(data_iter):
+        vid2idx = {}
+        refs = {}
+        for idx, (vid, captions) in enumerate(data_iter.captions.items()):
+            vid2idx[vid] = idx
+            refs[idx] = captions
+        return refs, vid2idx
+
+    model.eval()
+
+    YOLO_iter = build_YOLO_iter(data_iter, batch_size=32)
+    refs, vid2idx = build_refs(data_iter)
+
+    hypos = {}
+    for vids, feats in tqdm(YOLO_iter, desc='test'):
+        captions = model.describe(feats)
+        captions = [ idxs_to_sentence(caption, vocab.idx2word, vocab.word2idx['<EOS>']) for caption in captions ]
+        for vid, caption in zip(vids, captions):
+            hypos[vid2idx[vid]] = [ caption ]
+    return hypos, refs, vid2idx
 
 def build_YOLO_iter(data_iter, batch_size):
     score_dataset = {}

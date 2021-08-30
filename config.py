@@ -97,6 +97,8 @@ class DecoderConfig:
 class Config:
     seed = 0xd3853c
 
+    run_mode = 'train' # 'train', 'test'
+
     corpus = 'MSVD'; assert corpus in [ 'MSVD', 'MSR-VTT' ]
 
     vocab = VocabConfig

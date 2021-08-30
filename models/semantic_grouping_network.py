@@ -132,6 +132,7 @@ class SemanticGroupingNetwork(nn.Module):
         return captions, CA_logits
 
     def describe(self, vis_feats):
+        #zzh: show caption
         batch_size = vis_feats.values()[0].size(0)
         vocab_size = self.decoder.output_size
 
@@ -180,6 +181,7 @@ class SemanticGroupingNetwork(nn.Module):
                 if t >= 2:
                     A = torch.bmm(phr_attns, phr_attns.transpose(1, 2))
                     A_mask = torch.eye(t-1, t-1).cuda().bool()
+                    # A_mask = torch.eye(t-1, t-1).cuda().byte()  #zzh
                     A.masked_fill_(A_mask, 0)
                     A_sum = A.sum(dim=2)
 
@@ -187,6 +189,7 @@ class SemanticGroupingNetwork(nn.Module):
                     indices = indices[indices[:, 1] < indices[:, 2]] # Leave only the upper triangle to prevent duplication
 
                     phr_masks = torch.zeros_like(A_sum).bool()
+                    # phr_masks = torch.zeros_like(A_sum).byte() #zzh
                     if len(indices) > 0:
                         redundancy_masks = torch.zeros_like(phr_masks).long()
                         indices_b = indices[:, 0]
@@ -198,6 +201,7 @@ class SemanticGroupingNetwork(nn.Module):
                         A_sum_ij = torch.stack(( A_sum_i, A_sum_j ), dim=1)
                         _, i_or_j = A_sum_ij.max(dim=1)
                         i_or_j = i_or_j.bool()
+                        # i_or_j = i_or_j.bool().byte()#zzh
                         indices_i_or_j = torch.zeros_like(indices_b)
                         indices_i_or_j[i_or_j] = indices_j[i_or_j]
                         indices_i_or_j[~i_or_j] = indices_i[~i_or_j]
